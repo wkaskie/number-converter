@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import './style.css';
 
 interface Props {}
@@ -14,6 +14,7 @@ export const HomePage: React.FC<Props> = () => {
   const [sourceNumber, setSourceNumber] = useState<string>();
   const [showError, setShowError] = useState<boolean>(false);
   const [disableConvert, setDisableConvert] = useState<boolean>(true);
+  const history = useHistory();
 
   const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = evt.target;
@@ -23,6 +24,17 @@ export const HomePage: React.FC<Props> = () => {
     setSourceNumber(value);
     showError && validateInput(evt);
   };
+
+  const handleKeyPress = (evt: React.KeyboardEvent<HTMLInputElement>) => {
+    if (evt.key === 'Enter') {
+      const isValid = isValidInput(sourceNumber || '');
+      
+      setShowError(!isValid);
+      if (isValid) {
+        history.push(`/results/${sourceNumber}`)
+      }
+    }
+  }
 
   const isValidInput = (value: string) => {    
     const unitIdentifier = value.slice(-1);
@@ -42,7 +54,7 @@ export const HomePage: React.FC<Props> = () => {
         <h3>(eg: 12k, 15m)</h3>
       </header>
       <section className="Body">
-        <input name="sourceNumber" onChange={handleChange} onBlur={validateInput}></input>
+        <input name="sourceNumber" onChange={handleChange} onBlur={validateInput} onKeyPress={handleKeyPress}></input>
         <div className="Break"></div>
         <Link
           className={`Button ${disableConvert && 'Button--Disabled'}`}
